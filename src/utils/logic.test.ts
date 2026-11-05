@@ -250,6 +250,28 @@ test('calculateAccountBalances correctly tracks simple 2-account setup (Main & P
   assert.equal(balances.totalNetWorth, 7450);
 });
 
+test('calculateAccountBalances correctly handles transfers using account display names like "Main Account"', () => {
+  const transactions: Transaction[] = [
+    { id: '1', amount: 500, type: 'transfer', category: 'Transfer', date: '2026-10-05', account: 'Main Account', toAccount: 'Personal Account', note: 'Allowance' },
+    { id: '2', amount: 200, type: 'transfer', category: 'Savings', date: '2026-10-10', account: 'Personal Account', toAccount: 'Savings Vault', note: 'Stash' },
+  ];
+
+  const balances = calculateAccountBalances(
+    transactions,
+    { main: 2000, personal: 100, savings: 500 },
+    new Date(2026, 9, 15)
+  );
+
+  assert.equal(balances.main.balance, 1500);
+  assert.equal(balances.personal.balance, 400); // 100 + 500 - 200 = 400
+  assert.equal(balances.savings.balance, 700); // 500 + 200 = 700
+  assert.equal(balances.savings.savedThisMonth, 200);
+
+  const safeRes = calculateSafeToSpend(transactions, 3000, 1000, 500, new Date(2026, 9, 15));
+  // Base discretionary: 3000 - 1000 - 500 = 1500. Net personal transfers: +500 (from main) - 200 (to savings) = +300. Total pool = 1800.
+  assert.equal(safeRes.safeToSpendMonth, 1800);
+});
+
 test('ledger cash flow and reimbursement settlement correctly calculates balances', () => {
   const transactions: Transaction[] = [
     { id: '1', amount: 80, type: 'expense', category: 'General', date: '2026-10-05', account: 'personal', note: 'Apples' },

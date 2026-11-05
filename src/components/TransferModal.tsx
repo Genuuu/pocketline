@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLifeOS } from '../context/LifeOSContext';
 import {
   X,
+  Check,
   ArrowRightLeft,
   Building2,
   User,
@@ -89,10 +90,14 @@ export const TransferModal: React.FC<TransferModalProps> = ({
     setNote(defaultNote);
   };
 
+  const [isSuccessState, setIsSuccessState] = useState(false);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!numAmount || numAmount <= 0) return;
     if (fromAccount === toAccount) return;
+
+    setIsSuccessState(true);
 
     transferFunds({
       fromAccount,
@@ -102,7 +107,10 @@ export const TransferModal: React.FC<TransferModalProps> = ({
       date,
     });
 
-    onClose();
+    setTimeout(() => {
+      setIsSuccessState(false);
+      onClose();
+    }, 350);
   };
 
   const getAccountData = (id: string) => {
@@ -371,11 +379,24 @@ export const TransferModal: React.FC<TransferModalProps> = ({
             </button>
             <button
               type="submit"
-              disabled={!numAmount || numAmount <= 0}
-              className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-xs font-semibold font-mono tracking-wide cursor-pointer shadow-md shadow-blue-600/25 flex items-center gap-1.5"
+              disabled={!numAmount || numAmount <= 0 || isSuccessState}
+              className={`px-5 py-2 rounded-lg text-xs font-semibold font-mono tracking-wide cursor-pointer flex items-center gap-1.5 transition-all duration-150 ${
+                isSuccessState
+                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
+                  : 'bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white shadow-md shadow-blue-600/25'
+              }`}
             >
-              <span>Transfer {numAmount > 0 ? `${settings.currency}${numAmount.toFixed(2)}` : ''}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              {isSuccessState ? (
+                <>
+                  <Check className="w-3.5 h-3.5 animate-in zoom-in-50 duration-150" />
+                  <span>Transfer Complete!</span>
+                </>
+              ) : (
+                <>
+                  <span>Transfer {numAmount > 0 ? `${settings.currency}${numAmount.toFixed(2)}` : ''}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </>
+              )}
             </button>
           </div>
         </form>

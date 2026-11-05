@@ -4,6 +4,7 @@ import { TransactionType } from '../types';
 import { getTodayDateString } from '../utils/quickCaptureParser';
 import {
   X,
+  Check,
   ArrowDownRight,
   ArrowUpRight,
   ArrowRightLeft,
@@ -71,10 +72,14 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
     setToAccount(prevFrom);
   };
 
+  const [isSuccessState, setIsSuccessState] = useState(false);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const num = parseFloat(amount);
     if (!num || num <= 0) return;
+
+    setIsSuccessState(true);
 
     if (type === 'transfer') {
       transferFunds({
@@ -97,7 +102,10 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
       });
     }
 
-    onClose();
+    setTimeout(() => {
+      setIsSuccessState(false);
+      onClose();
+    }, 350);
   };
 
   if (!isOpen) return null;
@@ -341,9 +349,23 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
               </button>
               <button
                 type="submit"
-                className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-lg text-xs font-semibold font-mono tracking-wide cursor-pointer shadow-md shadow-blue-600/25 flex-1 sm:flex-initial"
+                disabled={isSuccessState}
+                className={`px-5 py-2 rounded-lg text-xs font-semibold font-mono tracking-wide cursor-pointer flex-1 sm:flex-initial flex items-center justify-center gap-1.5 transition-all duration-150 ${
+                  isSuccessState
+                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
+                    : 'bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/25'
+                }`}
               >
-                {type === 'transfer' ? 'Transfer Funds' : 'Save Entry'}
+                {isSuccessState ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 animate-in zoom-in-50 duration-150" />
+                    <span>Entry Saved!</span>
+                  </>
+                ) : type === 'transfer' ? (
+                  'Transfer Funds'
+                ) : (
+                  'Save Entry'
+                )}
               </button>
             </div>
           </div>

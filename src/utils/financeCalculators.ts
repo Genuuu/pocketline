@@ -62,20 +62,44 @@ export function calculateSafeToSpend(
   // Filter transactions for the current month and year
   const currentMonthExpenses = transactions.filter((t) => {
     if (t.type !== 'expense') return false;
-    const [y, m] = t.date.split('-').map(Number);
+    const [y, m] = t.date ? t.date.split('-').map(Number) : [0, 0];
     return y === currentYear && m === currentMonth + 1;
   });
 
   const spentSoFarThisMonth = currentMonthExpenses.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
 
-  const discretionaryPool = Math.max(0, monthlyIncome - monthlyFixedBills - monthlyTargetSavings);
-  const safeToSpendMonth = discretionaryPool - spentSoFarThisMonth;
+  // Calculate net transfers into Personal spending account for this month
+  let netPersonalTransfers = 0;
+  for (const t of transactions) {
+    if (t.type === 'transfer') {
+      const [y, m] = t.date ? t.date.split('-').map(Number) : [0, 0];
+      if (y === currentYear && m === currentMonth + 1) {
+        const source = normalizeAccount(t.account);
+        const dest = normalizeAccount(t.toAccount || 'personal');
+        const amt = Number(t.amount) || 0;
+        if (dest === 'personal' && source !== 'personal') {
+          netPersonalTransfers += amt;
+        } else if (source === 'personal' && dest !== 'personal') {
+          netPersonalTransfers -= amt;
+        }
+      }
+    }
+  }
+
+  const baseDiscretionary = Math.max(0, monthlyIncome - monthlyFixedBills - monthlyTargetSavings);
+  const totalDiscretionaryPool = Math.max(0, baseDiscretionary + netPersonalTransfers);
+  const safeToSpendMonth = totalDiscretionaryPool - spentSoFarThisMonth;
 
   const { daysRemaining, totalDays, currentDay } = getDaysRemainingInMonth(referenceDate);
 
   const safeToSpendToday = safeToSpendMonth > 0 ? Math.round((safeToSpendMonth / daysRemaining) * 100) / 100 : 0;
 
-  const burnRatePercentage = discretionaryPool > 0 ? Math.min(100, Math.round((spentSoFarThisMonth / discretionaryPool) * 100)) : 100;
+  const burnRatePercentage =
+    totalDiscretionaryPool > 0
+      ? Math.min(100, Math.round((spentSoFarThisMonth / totalDiscretionaryPool) * 100))
+      : spentSoFarThisMonth > 0
+      ? 100
+      : 0;
 
   return {
     monthlyIncome,
@@ -239,9 +263,9 @@ export type MainOrPersonalOrSavings = 'main' | 'personal' | 'savings' | string;
 export function normalizeAccount(acc: string | undefined): string {
   if (!acc) return 'personal';
   const lower = acc.toLowerCase().trim();
-  if (lower === 'main' || lower === 'bank' || lower === 'checking') return 'main';
-  if (lower === 'savings' || lower === 'vault' || lower === 'stash') return 'savings';
-  if (lower === 'personal' || lower === 'card' || lower === 'cash') return 'personal';
+  if (lower === 'main' || lower.includes('main') || lower === 'bank' || lower === 'checking') return 'main';
+  if (lower === 'savings' || lower.includes('savings') || lower === 'vault' || lower === 'stash') return 'savings';
+  if (lower === 'personal' || lower.includes('personal') || lower === 'card' || lower === 'cash') return 'personal';
   return lower;
 }
 
@@ -317,6 +341,10 @@ export function calculateAccountBalances(
     } else if (tx.type === 'expense') {
       allAccounts[source].outflow += amt;
       allAccounts[source].balance -= amt;
+
+      if (source === 'savings' && isThisMonth) {
+        allAccounts.savings.savedThisMonth = (allAccounts.savings.savedThisMonth || 0) - amt;
+      }
     } else if (tx.type === 'transfer') {
       const dest = normalizeAccount(tx.toAccount || 'personal');
       if (!allAccounts[dest]) {
@@ -333,6 +361,9 @@ export function calculateAccountBalances(
 
       if (dest === 'savings' && isThisMonth) {
         allAccounts.savings.savedThisMonth = (allAccounts.savings.savedThisMonth || 0) + amt;
+      }
+      if (source === 'savings' && isThisMonth) {
+        allAccounts.savings.savedThisMonth = (allAccounts.savings.savedThisMonth || 0) - amt;
       }
     }
   }

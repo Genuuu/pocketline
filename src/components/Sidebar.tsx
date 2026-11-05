@@ -63,25 +63,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <>
-      {/* Mobile Top Bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-[#090d16]/95 backdrop-blur-md border-b border-slate-800/80 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-blue-600 text-white flex items-center justify-center font-bold text-xs font-heading shadow-sm shadow-blue-600/30">
-            P
-          </div>
-          <span className="font-heading text-base font-semibold tracking-tight text-white">
-            Pocketline
-          </span>
-        </div>
-        <button
-          onClick={onOpenMobile}
-          className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800/50 transition-colors cursor-pointer"
-          aria-label="Open Navigation"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
-      </div>
-
       {/* Mobile Backdrop */}
       {isOpenMobile && (
         <div
