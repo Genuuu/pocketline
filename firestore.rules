@@ -1,0 +1,79 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Health check / connection test document
+    match /test/{docId} {
+      allow read: if true;
+    }
+
+    // Reusable security helpers
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // User document & personal finance settings
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidId(userId);
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
+
+      // Financial Transactions (income, expense, transfers)
+      match /transactions/{transactionId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidId(transactionId);
+        allow delete: if isOwner(userId) && isValidId(transactionId);
+      }
+
+      // Accounts (Main, Personal, Savings, Custom)
+      match /accounts/{accountId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidId(accountId);
+        allow delete: if isOwner(userId) && isValidId(accountId);
+      }
+
+      // Purchase Wishlist Items
+      match /wishlist/{wishlistId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidId(wishlistId);
+        allow delete: if isOwner(userId) && isValidId(wishlistId);
+      }
+
+      // Action Items & Tasks
+      match /tasks/{taskId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidId(taskId);
+        allow delete: if isOwner(userId) && isValidId(taskId);
+      }
+
+      // Roadmap Projects
+      match /projects/{projectId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidId(projectId);
+        allow delete: if isOwner(userId) && isValidId(projectId);
+      }
+
+      // Brain Dump / Scratchpad Notes
+      match /braindump/{itemId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidId(itemId);
+        allow delete: if isOwner(userId) && isValidId(itemId);
+      }
+    }
+  }
+}

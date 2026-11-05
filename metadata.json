@@ -1,0 +1,6 @@
+{
+  "name": "Finance OS",
+  "description": "Clean personal finance command center to organize expenses, income, account transfers, and shared reimbursements.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

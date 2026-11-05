@@ -1,0 +1,166 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile and financial preferences",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 256 },
+        "name": { "type": "string", "maxLength": 100 },
+        "currency": { "type": "string", "maxLength": 8 },
+        "monthlyBudgetLimit": { "type": "number" },
+        "monthlyFixedBills": { "type": "number" },
+        "monthlyTargetSavings": { "type": "number" },
+        "monthlyExpectedIncome": { "type": "number" },
+        "mainStartingBalance": { "type": "number" },
+        "personalStartingBalance": { "type": "number" },
+        "savingsStartingBalance": { "type": "number" },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "email"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Financial income, expense, or transfer transaction",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "amount": { "type": "number" },
+        "type": { "type": "string", "enum": ["income", "expense", "transfer"], "maxLength": 20 },
+        "category": { "type": "string", "maxLength": 100 },
+        "date": { "type": "string", "maxLength": 20 },
+        "account": { "type": "string", "maxLength": 50 },
+        "toAccount": { "type": "string", "maxLength": 50 },
+        "note": { "type": "string", "maxLength": 500 },
+        "projectId": { "type": "string", "maxLength": 128 },
+        "isReimbursable": { "type": "boolean" },
+        "reimbursementStatus": { "type": "string", "enum": ["pending", "settled"], "maxLength": 20 },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "userId", "amount", "type", "category", "date", "account"]
+    },
+    "Account": {
+      "title": "Account",
+      "description": "Financial account (Main, Personal, Savings, or custom)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "type": { "type": "string", "maxLength": 30 },
+        "icon": { "type": "string", "maxLength": 50 },
+        "description": { "type": "string", "maxLength": 255 },
+        "startingBalance": { "type": "number" },
+        "isTransferrable": { "type": "boolean" },
+        "isDefault": { "type": "boolean" },
+        "color": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "userId", "name", "type", "startingBalance"]
+    },
+    "WishlistItem": {
+      "title": "WishlistItem",
+      "description": "Wishlist item saving goal",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 150 },
+        "price": { "type": "number" },
+        "savedAmount": { "type": "number" },
+        "priority": { "type": "string", "enum": ["high", "medium", "low"], "maxLength": 20 },
+        "status": { "type": "string", "enum": ["saving", "ready", "purchased"], "maxLength": 20 },
+        "url": { "type": "string", "maxLength": 1000 },
+        "notes": { "type": "string", "maxLength": 1000 },
+        "targetAccount": { "type": "string", "maxLength": 50 },
+        "targetDate": { "type": "string", "maxLength": 20 },
+        "purchasedDate": { "type": "string", "maxLength": 20 },
+        "purchasedTxId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "userId", "title", "price", "savedAmount", "priority", "status"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "Personal or project action task",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "status": { "type": "string", "enum": ["todo", "doing", "done"], "maxLength": 20 },
+        "priority": { "type": "string", "enum": ["low", "med", "high"], "maxLength": 20 },
+        "category": { "type": "string", "maxLength": 50 },
+        "dueDate": { "type": "string", "maxLength": 20 },
+        "isFocusTop3": { "type": "boolean" },
+        "notes": { "type": "string", "maxLength": 2000 },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "userId", "title", "status", "priority", "dueDate"]
+    },
+    "PlanProject": {
+      "title": "PlanProject",
+      "description": "Roadmap goal or project",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 150 },
+        "horizon": { "type": "string", "maxLength": 30 },
+        "status": { "type": "string", "maxLength": 30 },
+        "targetDate": { "type": "string", "maxLength": 20 },
+        "progress": { "type": "number" },
+        "budget": { "type": "number" },
+        "category": { "type": "string", "maxLength": 50 },
+        "notes": { "type": "string", "maxLength": 2000 },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "userId", "title", "status", "targetDate"]
+    },
+    "BrainDump": {
+      "title": "BrainDump",
+      "description": "Quick idea or scratchpad item",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "content": { "type": "string", "maxLength": 2000 },
+        "category": { "type": "string", "maxLength": 50 },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "isPinned": { "type": "boolean" }
+      },
+      "required": ["id", "userId", "content"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile and top-level user preferences"
+    },
+    "/users/{userId}/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "Income, expenses, and account transfers"
+    },
+    "/users/{userId}/accounts/{accountId}": {
+      "schema": "Account",
+      "description": "Configured user accounts"
+    },
+    "/users/{userId}/wishlist/{wishlistId}": {
+      "schema": "WishlistItem",
+      "description": "Wishlist purchase items and saving progress"
+    },
+    "/users/{userId}/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "Action items and daily tasks"
+    },
+    "/users/{userId}/projects/{projectId}": {
+      "schema": "PlanProject",
+      "description": "Roadmap goals and projects"
+    },
+    "/users/{userId}/braindump/{itemId}": {
+      "schema": "BrainDump",
+      "description": "Quick capture thoughts and scratchpad items"
+    }
+  }
+}
