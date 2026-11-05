@@ -389,7 +389,7 @@ const RootApp: React.FC = () => {
   }
 
   return (
-    <LifeOSProvider>
+    <LifeOSProvider key={user?.uid || 'guest'}>
       <MainApp />
     </LifeOSProvider>
   );

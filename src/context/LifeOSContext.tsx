@@ -168,6 +168,23 @@ export const LifeOSProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const { user, loading: isAuthLoading, signInWithGoogle, signOut: signOutUser } = useAuth();
   const uid = user?.uid || 'guest';
 
+  // Auto-migrate guest localStorage data to authenticated user storage upon login
+  useEffect(() => {
+    if (user && !user.uid.startsWith('guest-')) {
+      const guestPrefix = 'finance_os_guest_';
+      const userPrefix = `finance_os_${user.uid}_`;
+      const keys = ['transactions', 'accounts', 'wishlist', 'tasks', 'habits', 'projects', 'braindump', 'settings', 'categories', 'privacy_mask'];
+      
+      keys.forEach((key) => {
+        const guestVal = localStorage.getItem(`${guestPrefix}${key}`);
+        const userVal = localStorage.getItem(`${userPrefix}${key}`);
+        if (guestVal && !userVal) {
+          localStorage.setItem(`${userPrefix}${key}`, guestVal);
+        }
+      });
+    }
+  }, [user]);
+
   const [activeTab, setActiveTab] = useState<ActiveTab>('overview');
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
